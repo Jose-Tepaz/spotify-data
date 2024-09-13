@@ -18,7 +18,6 @@ export default class Playlists extends Component {
   nombreUsuario = localStorage.getItem('user_id');
 
 
-
   state = {
     playlists: [],
     playlistsPublicas: [],
