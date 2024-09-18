@@ -11,7 +11,7 @@ export default class Header extends Component {
     // searchParams = new URLSearchParams(window.location.search);
     // access_token = this.searchParams.get("access_token");
     access_token = localStorage.getItem('access_token');
-
+    
 
     state = {
         dataPerfil: [],
@@ -25,6 +25,7 @@ export default class Header extends Component {
     componentDidMount = () => {
         // this.cambiarSeleccion()
         this.datosUsuario()
+        console.log(localStorage);
     }
 
     // *CAMBIAR MENU
@@ -72,8 +73,10 @@ export default class Header extends Component {
 
     // *CERRAR SESION
     cerrarSesion = () => {
-        localStorage.clear()
-        return (<Navigate to="/" />)
+        localStorage.clear();
+        console.log("cerrando sesion");
+        console.log(localStorage);
+        window.location.href = '/';
     }
 
 
@@ -91,10 +94,10 @@ export default class Header extends Component {
                                 (this.state.statusPerf === true) && (
                                     <div>
                                         <div className="logOut" onClick={this.cerrarSesion} >
-                                            <Link to="/">
+                                            <Link >
                                                 <FontAwesomeIcon icon={faRightFromBracket} className="mx-2 logOutIcono fa-2xl" />
                                             </Link>
-                                            <Link to="/">
+                                            <Link  >
                                                 <h1 className="logOutTexto" >Cerrar sesion</h1>
                                             </Link>
                                         </div>

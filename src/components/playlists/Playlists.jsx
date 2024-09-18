@@ -23,6 +23,7 @@ export default class Playlists extends Component {
     playlistsPublicas: [],
     playlistsPrivadas: [],
     playlistsSeguidas: [],
+    artistasMasEscuchados: [],
     statusPlay: false,
     statusLoading: false,
     total: 0,
@@ -40,17 +41,34 @@ export default class Playlists extends Component {
     }
   }
 
+  headerArtists = {
+    headers: {
+      "Authorization": "Bearer " + `${Global.airtable_api_key}`,
+      "Content-Type": "application/json"
+    }
+  }
   componentDidMount = () => {
 
     // console.log("en playlist: "+Global.access_token)
     this.getUsuario()
     this.getListas()
+    this.getArtistas()
     getRefreshedAccesToken();
+
+    this.postArtistasToAirtable();
+
+    console.log(this.headerArtists)
   }
+
+
+
+
+
 
   getUsuario = () => {
     axios.get("https://api.spotify.com/v1/me", this.headers).then(response => {
       const nombre = response.data.id
+      console.log(response.data)
       this.setState({
         nombreUsuario: nombre
       })
@@ -62,7 +80,7 @@ export default class Playlists extends Component {
   getListas = () => {
     axios.get("https://api.spotify.com/v1/me/playlists?limit=" + Global.playlistLimit + "&offset=" + this.offsetPlaylist + "", this.headers).then(response => {
       const datos = response.data
-      // console.log(datos);
+      //console.log(datos);
       var totalListas = (datos.total)
       // BUCLE
       if (this.offsetPlaylist < totalListas) {
@@ -95,7 +113,57 @@ export default class Playlists extends Component {
       }
     })
   }
+  
+typeRequest = "artists";
 
+  getArtistas = () => {
+    axios.get("https://api.spotify.com/v1/me/top/artists", this.headers).then(response => {
+      const datos = response.data;
+      console.log(response.data.items);
+      console.log("safsdfasdf asdfg asdfa sdf a");
+      //var totalListas = (datos.total)
+    
+    })
+  }
+ 
+
+
+  postArtistasToAirtable = () => {
+    // First, get the top artists from Spotify
+    axios.get("https://api.spotify.com/v1/me/top/artists", this.headers)
+      .then(response => {
+        const artists = response.data.items;
+        
+        // Prepare the data for Airtable
+        const records = artists.map(artist => ({
+          name: artist.name
+          
+        }));
+        // Convert records to a comma-separated string
+        const recordsString = records.map(record => record.name).join(', ');
+        console.log(recordsString);
+
+
+        // Post the data to Airtable
+        axios.post('https://api.airtable.com/v0/appLHVIhVyZXahFf8/tblxHy4daeu4y8bF6', {
+          records: recordsString
+        }, {
+          headers: {
+            'Authorization': `Bearer ${Global.airtable_api_key}`,
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => {
+          console.log('Artists successfully posted to Airtable');
+        })
+        .catch(error => {
+          console.error('Error posting artists to Airtable:', error);
+        });
+      })
+      .catch(error => {
+        console.error('Error fetching top artists from Spotify:', error);
+      });
+  }
 
 
 
@@ -241,6 +309,22 @@ export default class Playlists extends Component {
                   <summary><FontAwesomeIcon icon={faHeart} className="mx-2 icon" />Seguidas</summary>
                   {
                     this.state.playlistsSeguidas.map((playlist, index) => {
+                      return (
+                        <button key={playlist.id + index} data-plistid={playlist.id} onClick={() => this.getCanciones(playlist)} className="btnPlist">
+                          {
+                            (playlist.name === "") ?
+                              ("Sin Nombre") :
+                              (playlist.name)
+                          }
+                        </button>
+                      )
+                    })
+                  }
+                </details>
+                <details>
+                  <summary><FontAwesomeIcon icon={faHeart} className="mx-2 icon" />Artistas más escuchados</summary>
+                  {
+                    this.state.artistasMasEscuchados.map((playlist, index) => {
                       return (
                         <button key={playlist.id + index} data-plistid={playlist.id} onClick={() => this.getCanciones(playlist)} className="btnPlist">
                           {

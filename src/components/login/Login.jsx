@@ -10,13 +10,17 @@ const spoty_url = `https://accounts.spotify.com/authorize?client_id=${Global.cli
 export default function Login() {
 
     const location = useLocation();
+   
     let navigate = useNavigate();
+    
 
 
     useEffect(() => {
 
         const urlParams = new URLSearchParams(location.search)
+        
         const spotyCode = urlParams.get("code");
+        
         if (spotyCode) {
             autenticateUser(spotyCode)
         }
